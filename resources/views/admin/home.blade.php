@@ -16,6 +16,9 @@
 
                     {{ __('You are logged in!') }}
                 </div>
+                <a href="{{route('admin.posts.create')}}">Create</a>
+    
+                <a href="{{route('admin.posts.index')}}">List</a>
             </div>
         </div>
     </div>

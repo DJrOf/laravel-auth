@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use\App\models\Post;
+use App\Models\Post;
 
 class PostController extends Controller
 {
@@ -15,8 +15,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        $post = Post::all();
-        return view('admin.posts.index', compact('posts'))
+         $posts = Post::all();
+        return view('admin.posts.index', compact('posts'));
     }
 
     /**
@@ -26,7 +26,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        $post = new Post();
+        return view('admin.posts.create', compact('post'));
     }
 
     /**
@@ -37,7 +38,26 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+    $request->validate([
+    'title' => 'required|string|unique:posts|min:5|max:50',
+    'content' => 'string',
+    'image' => 'url'
+], [
+    'require.title' => 'titolo obbligaotiro',
+    'min.title' => 'Lunghezza minima: 5 caratteri',
+    'max.title' => 'Lunghezza massima: 50 caratteri',
+    'unique.title' => "Esiste già un post dal titolo $request->title"
+]);
+
+        $data = $request->all();
+
+        $post = new Post();
+        
+        $post->fill($data);
+        $post->slug = $post->title;
+        $post->save();
+
+        return redirect()->route('admin.posts.index')->with('message', 'post create con successo')->with('type', 'success');
     }
 
     /**
@@ -48,7 +68,8 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        $post = Post::findOrFail($id);
+        return view('admin.posts.show', compact('post'));
     }
 
     /**
@@ -57,9 +78,9 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Post $post)
     {
-        //
+        return view('admin.posts.edit', compact('post'));
     }
 
     /**
@@ -69,9 +90,14 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Post $post)
     {
-        //
+
+        $data = $request->all();
+        $post->fill($data);
+        $post->save();
+
+        return redirect()->route('admin.posts.show', compact('post'));
     }
 
     /**
@@ -80,8 +106,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Post $post)
     {
-        //
+        $post->delete();
+
+        return redirect()->route('admin.posts.index')->with('message', "$post->title has been successfully deleted")->with('type', 'success');
     }
 }

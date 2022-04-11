@@ -15,21 +15,25 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Auth::routes();
+Auth::routes(['register' => true]);
 
 Route::middleware('auth')
-->prefix('admin')
 ->name('admin.')
 ->namespace('Admin')
+->prefix('admin')
 ->group(function(){
 
-    Route::get('/admin', 'HomeController@index')->middleware('auth')->name('home');
+    Route::get('/', 'PostController@index')->name('home');
     Route::resource('posts', 'PostController');
+    Route::get('/{any}', function() {
+        abort(404);
+    })->where('any', '.*');
 
 });
 
 Route::get('{any?}', function () {
     return view('guest.home');
 })->where("any", ".*");
+
 
 
